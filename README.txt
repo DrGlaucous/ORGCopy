@@ -7,6 +7,7 @@ It was developed by the game's creator, Daisuke "Pixel" Amaya specifically for t
 Program features:
 Drag and drop support for directory names
 Automatic time signature adjustment to account for any differences between songs
+The ability to combine multiple tracks into 1 (TrackMASHing)
 That's about it...
 
 

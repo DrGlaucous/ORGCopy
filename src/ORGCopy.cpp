@@ -245,9 +245,8 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 		memset(&BufferNote, 0, sizeof(BufferNote));
 
 
-		memfile[3] = memfile[1];//stash memfile3
 		memfile[2] = memfile[0];//stash memfile2 at the copied track's header (so we can write it back later)
-
+		memfile[3] = memfile[1];//stash memfile3 at the start of the header
 
 		//WRITE all headers until the paste destination, then advance the pointer to the end of the header
 		for (int i = 0; i < MAXTRACK; ++i)
@@ -255,6 +254,7 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 			if (i < TrackPaste)
 			{
 				fwrite(memfile[1], 6, 1, file);//write the headers of everything up to the target track
+				memfile[3] += 6;//advance post-header pointer to next track (to finish header writeback after we perform MASH calculations)
 			}
 
 
@@ -271,7 +271,7 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 		//will write out everything UP TO the conflicting track (and leave the pointer there so we can merge both data at that track)
 		for (unsigned int i = 0; i < TrackPaste; ++i)
 		{
-			fwrite(memfile[1], (8 * orgs[1].tracks[i].note_num), 1, file);//write the notes for this track
+			//fwrite(memfile[1], (8 * orgs[1].tracks[i].note_num), 1, file);//write the notes for this track (the header isnt done yet, we can't do this)
 
 			memfile[1] += (8 * orgs[1].tracks[i].note_num);//move pointer forward
 
@@ -411,6 +411,8 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 
 
 				}
+
+				i = 1;//start over (not starting over may give us skip-over errors)
 			}
 
 
@@ -426,6 +428,8 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 
 
 		//finish writing out
+
+		//finish the header
 		for (int i = TrackPaste; i < MAXTRACK; ++i)
 		{
 			if (i > TrackPaste)
@@ -439,6 +443,16 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 			}
 
 			memfile[3] += 6;//advance to next track
+
+		}
+
+
+		//write all the notes up to the special track
+		for (unsigned int i = 0; i < TrackPaste; ++i)
+		{
+			fwrite(memfile[3], (8 * orgs[1].tracks[i].note_num), 1, file);//write the notes for this track
+
+			memfile[3] += (8 * orgs[1].tracks[i].note_num);//move pointer forward
 
 		}
 
@@ -457,7 +471,7 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 
 
 
-		//memfile[1] += (orgs[1].tracks[TrackPaste].note_num * 8);//move to the end of the data chunk (recall that the memory file's data didn't change with the operations above)
+		//memfile[1] += (orgs[1].tracks[TrackPaste].note_num * 8);//move to the end of the data chunk (recall that the memory file's data didn't change with the operations above) (also recall that in reading from this pointer, we already moved it forward)
 
 		for (int i = TrackPaste + 1; i < MAXTRACK; ++i)//iterate through the rest of the unwritten notes
 		{
@@ -656,7 +670,7 @@ int main(void)
 						{
 							std::cout << "You Selected track #" << TrackPaste << std::endl;
 
-							if (PopulatedTrack(Path2.c_str(), TrackPaste))
+							if (PopulatedTrack(Path2.c_str(), TrackPaste - 1))
 							{
 								std::cout << "Warning: The selected track is already populated!"
 									<< "\nDo you want to overwrite it? (y/n)" << std::endl;
@@ -709,15 +723,13 @@ int main(void)
 									}
 
 
-
-
-
-
-
 								}
 
 							}
-
+							else
+							{
+								ValidTrackCopy = true;
+							}
 
 						}
 
@@ -765,6 +777,7 @@ int main(void)
 			if (CopyOrgData(Path1, Path2, TrackCopy - 1, TrackPaste - 1, TrackMASH, PrioFile))//since "track 1" is acutally track 0 in the file, we must shift these values
 			{
 				confirm = 0;//reset choice
+				std::cout << "\nProcess complete." << std::endl;
 				//canExit = true;
 			}
 			else
