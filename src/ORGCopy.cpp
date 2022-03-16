@@ -777,7 +777,7 @@ int main(void)
 			if (CopyOrgData(Path1, Path2, TrackCopy - 1, TrackPaste - 1, TrackMASH, PrioFile))//since "track 1" is acutally track 0 in the file, we must shift these values
 			{
 				confirm = 0;//reset choice
-				std::cout << "\nProcess complete." << std::endl;
+				std::cout << "\nDone." << std::endl;
 				//canExit = true;
 			}
 			else
