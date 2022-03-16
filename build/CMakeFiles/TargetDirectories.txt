@@ -1,3 +1,0 @@
-C:/Users/Edward Stuckey/Desktop/CaveStory RomHack/ORGTools/ORGCopySource/ORGCopy/build/CMakeFiles/rebuild_cache.dir
-C:/Users/Edward Stuckey/Desktop/CaveStory RomHack/ORGTools/ORGCopySource/ORGCopy/build/CMakeFiles/edit_cache.dir
-C:/Users/Edward Stuckey/Desktop/CaveStory RomHack/ORGTools/ORGCopySource/ORGCopy/build/CMakeFiles/ORGCopy.dir
