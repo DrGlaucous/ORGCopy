@@ -61,6 +61,4 @@ Organya Music Format: Daisuke "Pixel" Amaya
 
 "File.cpp" (mostly borrowed from CSE2, a reverse-engineering of the cave story engine): Clownacy and whoever else...
 
-[MIDI-Parser](https://github.com/MStefan99/Midi-Parser) library: MStefan99
-
 Everything left over: Dr_Glaucous
