@@ -254,7 +254,7 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 		memfile[3] = memfile[1];//stash memfile3 at the start of the header
 
 		//WRITE all headers until the paste destination, then advance the pointer to the end of the header
-		for (int i = 0; i < MAXTRACK; ++i)
+		for (unsigned int i = 0; i < MAXTRACK; ++i)
 		{
 			if (i < TrackPaste)
 			{
@@ -435,7 +435,7 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 		//finish writing out
 
 		//finish the header
-		for (int i = TrackPaste; i < MAXTRACK; ++i)
+		for (unsigned int i = TrackPaste; i < MAXTRACK; ++i)
 		{
 			if (i > TrackPaste)
 			{
