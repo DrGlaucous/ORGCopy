@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+//#include <stdlib.h>//originally intended to improve the terminal experience, but dropped in favor of developing a full GUI version of this program instead
 #include <cstring>
 #include <sstream>
 #include <vector>
@@ -11,7 +12,7 @@
 #include "ORGCopy.h"
 #include "File.h"
 
-#define PRGMVERSION "1.0.2"
+#define PRGMVERSION "1.0.3"
 #define READ_LE16(p) ((p[1] << 8) | p[0]); p += 2
 #define READ_LE32(p) ((p[3] << 24) | (p[2] << 16) | (p[1] << 8) | p[0]); p += 4
 
@@ -127,6 +128,7 @@ void CheckForQuote(std::string *inpath)
 
 char pass[7] = "Org-01";
 char pass2[7] = "Org-02";	// Pipi
+char pass3[7] = "Org-03";
 
 //tells if the file is an ORG or not
 bool VerifyFile(const char* path)
@@ -145,7 +147,10 @@ bool VerifyFile(const char* path)
 	
 	fread(header, 1, 6, file);//get header
 
-	if (memcmp(header, pass, 6) != 0 && memcmp(header, pass2, 6) != 0)//see if the header matches either orgv1 or orgv2
+	if (memcmp(header, pass, 6) != 0 &&
+		memcmp(header, pass2, 6) != 0 &&
+		memcmp(header, pass3, 6) != 0
+		)//see if the header matches either orgv1, orgv2, or orgv3
 	{
 		return false;
 	}
@@ -549,6 +554,42 @@ bool CopyOrgData(std::string Path1, std::string Path2, unsigned int TrackCopy, u
 
 }
 
+//converts the QWERTY drum tracks into an int usable by the other functions
+int ParseLetterInput(const char* input)//this function will just look at the first letter in the pointer (not a problem if you only give it one letter)
+{
+	switch (tolower(*input))
+	{
+		break;
+	case 'q':
+		return 9;
+		break;
+	case 'w':
+		return 10;
+		break;
+	case 'e':
+		return 11;
+		break;
+	case 'r':
+		return 12;
+		break;
+	case 't':
+		return 13;
+		break;
+	case 'y':
+		return 14;
+		break;
+	case 'u':
+		return 15;
+		break;
+	case 'i':
+		return 16;
+		break;
+	default:
+		return 0;
+
+	}
+
+}
 
 int main(void)
 {
@@ -566,8 +607,8 @@ int main(void)
 
 
 	//for testing the MASH function
-	//Path1 = std::string("C:\\Users\\Edward Stuckey\\Desktop\\CaveStory RomHack\\ORGTools\\ORGCopySource\\TestSong.org");
-	//Path2 = std::string("C:\\Users\\Edward Stuckey\\Desktop\\CaveStory RomHack\\ORGTools\\ORGCopySource\\TestSong.org1.org");
+	//Path1 = std::string("C:\\Users\\User\\Desktop\\CaveStory RomHack\\ORGTools\\ORGCopySource\\TestSong.org");
+	//Path2 = std::string("C:\\Users\\User\\Desktop\\CaveStory RomHack\\ORGTools\\ORGCopySource\\TestSong.org1.org");
 	//CopyOrgData(Path1, Path2, 0, 1, true, 1);
 
 
@@ -602,16 +643,18 @@ int main(void)
 					TrackCopy = strtol(InputText.c_str(), NULL, 10);//copy value to the cache
 
 					if (
-						TrackCopy > 16 ||
-						TrackCopy < 1
+						(TrackCopy <= 16 && TrackCopy >= 1) ||
+						(InputText.length() < 2 && (TrackCopy = ParseLetterInput(InputText.c_str())))
 						)//verify that the track selected is within the range of valid tracks
 					{
-						std::cout << "Invalid track: " << TrackCopy << "\nEnter a number between 1 and 16" << std::endl;
+
+						std::cout << "You Selected track #" << TrackCopy << std::endl;
+						ValidTrackCopy = true;
+
 					}
 					else
 					{
-						std::cout << "You Selected track #" << TrackCopy << std::endl;
-						ValidTrackCopy = true;
+						std::cout << "Invalid track: " << TrackCopy << "\nEnter a number between 1 and 16 or a valid drum track" << std::endl;
 					}
 
 
@@ -621,9 +664,9 @@ int main(void)
 				ValidFirstOrg = true;
 
 			}
-			else
+			else//TODO: make this a warning, but still let users try to copy to and from it (to cover my butt against any more file header variations, may save this for the GUI revision)
 			{
-				std::cout << InputText << " is NOT an ORG file. " << std::endl;
+				std::cout << InputText << " is NOT recognized as an ORG file. " << std::endl;
 
 			}
 
@@ -659,16 +702,16 @@ int main(void)
 
 						TrackPaste = strtol(InputText.c_str(), NULL, 10);//copy value to the cache
 
+
+
 						if (
-							TrackPaste > 16 ||
-							TrackPaste < 1
+							(TrackPaste <= 16 && TrackPaste >= 1) ||
+							(InputText.length() < 2 && (TrackPaste = ParseLetterInput(InputText.c_str())))
 							)//verify that the track selected is within the range of valid tracks
 						{
-							std::cout << "Invalid track: " << TrackPaste << "\nEnter a number between 1 and 16" << std::endl;
-						}
-						else
-						{
+
 							std::cout << "You Selected track #" << TrackPaste << std::endl;
+							
 
 							if (PopulatedTrack(Path2.c_str(), TrackPaste - 1))
 							{
@@ -732,6 +775,12 @@ int main(void)
 							}
 
 						}
+						else
+						{
+							std::cout << "Invalid track: " << TrackPaste << "\nEnter a number between 1 and 16 or a valid drum track" << std::endl;
+						}
+
+
 
 
 					}
